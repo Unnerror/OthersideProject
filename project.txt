@@ -74,3 +74,35 @@ REFERENCES [User](UserID);
 ALTER TABLE BookingRules
 ADD CONSTRAINT FK_BookingRules_Room FOREIGN KEY (RoomID)
 REFERENCES Room(RoomId);
+
+
+
+
+
+
+-- creating RoomAvailabilityView
+CREATE VIEW RoomAvailabilityView AS
+SELECT 
+    r.RoomId,
+    r.RoomName,
+    r.Capacity,
+    CASE 
+        WHEN b.ReservationID IS NOT NULL THEN 'Booked'
+        ELSE 'Available'
+    END AS Status,
+    COALESCE(b.StartTime, '1900-01-01') AS BookedStartTime, -- Default start time
+    COALESCE(b.EndTime, '9999-12-31') AS BookedEndTime     -- Default end time
+FROM 
+    Room r
+LEFT JOIN 
+    Reservation b ON r.RoomId = b.RoomID;
+
+
+
+
+-- calling RoomAvailabilityView
+SELECT *
+FROM RoomAvailabilityView
+WHERE BookedStartTime >= '2024-03-01' 
+    AND BookedEndTime <= '2024-03-31'
+    AND RoomName = 'YourRoomName';
