@@ -1,0 +1,33 @@
+-- User should book by an hour slot not by minutes or half an hour --
+DECLARE @RoomID CHAR(10) = '1';
+DECLARE @ReservationStartTime DATETIME = '2024-05-01 12:00:00'; -- Reservation start time
+DECLARE @ReservationEndTime DATETIME = '2024-05-02 12:00:00'; -- Reservation end time
+
+-- Calculate the total price for the entire reservation
+DECLARE @TotalPrice DECIMAL(10, 2) = 0;
+
+-- Iterate over each hour of the reservation
+DECLARE @CurrentHour DATETIME = @ReservationStartTime;
+
+WHILE @CurrentHour < @ReservationEndTime
+BEGIN
+    -- Get the applicable booking rule for the current hour
+    DECLARE @PricePerHour DECIMAL(10, 2) = (
+        SELECT TOP 1 PricePerHour
+        FROM BookingRules
+        WHERE RoomID = @RoomID
+            AND DayOfWeek = DATENAME(WEEKDAY, @CurrentHour)
+            AND CAST(StartTime AS TIME) <= CAST(@CurrentHour AS TIME)
+            AND CAST(EndTime AS TIME) > CAST(@CurrentHour AS TIME)
+        ORDER BY StartTime
+    );
+
+    -- Add the price for the current hour to the total price
+    SET @TotalPrice = @TotalPrice + @PricePerHour;
+
+    -- Move to the next hour
+    SET @CurrentHour = DATEADD(HOUR, 1, @CurrentHour);
+END;
+
+-- Output the total price
+SELECT @TotalPrice AS TotalPrice;

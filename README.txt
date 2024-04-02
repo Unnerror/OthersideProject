@@ -1,7 +1,7 @@
-# OthersideProject
+# Database Project - Time Booking Plugin
 
-Support docs design file:
+Docs design sandbox:
 https://www.figma.com/file/D9hiJgvnZFLpBedpTOwJCE/Dani%2BTakashi?type=whiteboard&t=RzBIw754Mr09t4fR-1
 
-Sandbox googlesheet:
+Spreadsheet sandbox:
 https://docs.google.com/spreadsheets/d/1XAIh2rDx2TNO3X3yqlxM6ibbe4fR_hMc-RgAhWTmB1E/edit?usp=sharing

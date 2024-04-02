@@ -1,0 +1,68 @@
+DECLARE @RoomID CHAR(10) = '1';
+DECLARE @UserID CHAR(10) = 'USER' + RIGHT('00' + CAST(CAST(RAND() * 10 AS INT) + 1 AS VARCHAR(2)), 3);
+DECLARE @ReservationStartDate DATETIME = '2024-05-01'; -- Reservation start date
+DECLARE @ReservationEndDate DATETIME = '2024-05-07'; -- Reservation end date
+
+-- Generate random reservation date between May 1st and May 7th
+DECLARE @ReservationDate DATETIME = DATEADD(DAY, RAND() * 7, @ReservationStartDate);
+
+-- Generate random start time between 0:00 and 23:00
+DECLARE @StartTimeHour INT = RAND() * 24; -- Random integer between 0 and 23
+DECLARE @ReservationStartTime DATETIME = DATEADD(HOUR, @StartTimeHour, @ReservationDate);
+
+-- Generate random end time at least 3 hours after start time
+DECLARE @EndTimeHour INT = @StartTimeHour + 3 + RAND() * (24 - @StartTimeHour - 3); -- Random integer between start hour + 3 and 23
+DECLARE @ReservationEndTime DATETIME = DATEADD(HOUR, @EndTimeHour, @ReservationDate);
+
+-- Generate random number of guests between 1 and 10
+DECLARE @NumberGuest INT = CAST(RAND() * 10 + 1 AS INT);
+
+-- Check if there are any existing reservations for the specified room during the given time slot
+IF NOT EXISTS (
+    SELECT 1
+    FROM Reservation
+    WHERE RoomID = @RoomID
+        AND PrepationTime < @ReservationEndTime -- Changed StartTime to PrepationTime
+        AND DATEADD(HOUR, 1, EndTime) > @ReservationStartTime -- EndTime plus one hour
+)
+BEGIN
+    -- Insert the reservation data into the table
+    BEGIN TRY
+        -- Calculate the total price for the reservation based on the booking rules
+        DECLARE @TotalPrice DECIMAL(10, 2) = 0;
+        DECLARE @CurrentHour DATETIME = @ReservationStartTime;
+
+        WHILE @CurrentHour < @ReservationEndTime
+        BEGIN
+            DECLARE @PricePerHour DECIMAL(10, 2) = (
+                SELECT TOP 1 PricePerHour
+                FROM BookingRules
+                WHERE RoomID = @RoomID
+                    AND DayOfWeek = DATENAME(WEEKDAY, @CurrentHour)
+                    AND CAST(StartTime AS TIME) <= CAST(@CurrentHour AS TIME)
+                    AND CAST(EndTime AS TIME) > CAST(@CurrentHour AS TIME)
+                ORDER BY StartTime
+            );
+
+            SET @TotalPrice = @TotalPrice + @PricePerHour;
+
+            SET @CurrentHour = DATEADD(HOUR, 1, @CurrentHour);
+        END;
+
+        -- Insert the reservation data into the table
+        INSERT INTO Reservation (UserID, RoomID, PrepationTime, StartTime, EndTime, TotalPrice, Status, Purpose, NumberGuest)
+        VALUES (@UserID, @RoomID, DATEADD(HOUR, -1, @ReservationStartTime), @ReservationStartTime, @ReservationEndTime, @TotalPrice, 'Active', 'Meeting', @NumberGuest);
+    END TRY
+    BEGIN CATCH
+        -- Handle errors if needed
+        PRINT 'Error occurred while inserting reservation.';
+    END CATCH;
+
+    -- Display the inserted reservation record
+    SELECT * FROM Reservation;
+END
+ELSE
+BEGIN
+    -- Display a message indicating that the room is already booked during the specified time slot
+    PRINT 'Room is already booked during the specified time slot. Double booking not allowed.';
+END;
