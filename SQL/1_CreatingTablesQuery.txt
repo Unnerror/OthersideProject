@@ -3,9 +3,9 @@ CREATE TABLE Reservation (
     ReservationID INT IDENTITY(1,1) PRIMARY KEY,
     UserID CHAR(10) FOREIGN KEY REFERENCES [User](UserID),
     RoomID CHAR(10) FOREIGN KEY REFERENCES Room(RoomId),
-    PrepationTime DATE,
-    StartTime DATE,
-    EndTime DATE,
+    PrepationTime datetime,
+    StartTime datetime,
+    EndTime datetime,
     TotalPrice DECIMAL(10,2),
     Status VARCHAR(10),
     Purpose VARCHAR(64),
@@ -50,8 +50,8 @@ CREATE TABLE BookingRules (
     RuleID INT PRIMARY KEY,
     RoomID CHAR(10) FOREIGN KEY REFERENCES Room(RoomId),
     DayofWeek CHAR(10),
-    StartTime DATE,
-    EndTime DATE,
+    StartTime TIME(7),
+    EndTime TIME(7),
     PricePerHour INT
 );
 
