@@ -1,0 +1,60 @@
+-- Create the new CreateReservation procedure
+CREATE PROCEDURE CreateReservation
+    @RoomID CHAR(10),
+    @ReservationStartDate DATETIME,
+    @ReservationEndDate DATETIME,
+    @PreparationTime DATETIME,
+    @Purpose VARCHAR(64),
+    @NumberGuest INT,
+    @UserComment CHAR(512) = NULL,
+    @AdminComment CHAR(512) = NULL,
+    @ForeheadVisitTime DATETIME = NULL,
+    @UserName VARCHAR(64),
+    @E_mail VARCHAR(64),
+    @Phone_Num VARCHAR(15)
+AS
+BEGIN
+    DECLARE @TotalPrice DECIMAL(10, 2);
+
+    -- Calculate the total price for the reservation using the CalculateReservationPrice stored procedure
+    EXEC CalculateReservationPrice @RoomID, @ReservationStartDate, @ReservationEndDate, @TotalPrice OUTPUT;
+
+    -- Check if the user already exists in the User table
+    IF NOT EXISTS (SELECT 1 FROM [User] WHERE E_mail = @E_mail OR Phone_Num = @Phone_Num)
+    BEGIN
+        -- Insert the new user into the User table
+        INSERT INTO [User] (UserID, UserName, E_mail, Phone_Num)
+        VALUES (@UserName, @E_mail, @Phone_Num);
+    END;
+
+    -- Retrieve the UserID for the user
+    DECLARE @UserID CHAR(10) = (SELECT UserID FROM [User] WHERE E_mail = @E_mail OR Phone_Num = @Phone_Num);
+
+    -- Check if the room is available for the specified time slot
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Reservation
+        WHERE RoomID = @RoomID
+            AND StartTime < @ReservationEndDate
+            AND EndTime > @ReservationStartDate
+    )
+    BEGIN
+        -- Insert the reservation data into the Reservation table
+        BEGIN TRY
+            INSERT INTO Reservation (UserID, RoomID, PrepationTime, StartTime, EndTime, TotalPrice, Status, Purpose, NumberGuest, UserComment, AdminComment, ForeheadVisitTime)
+            VALUES (@UserID, @RoomID, @PreparationTime, @ReservationStartDate, @ReservationEndDate, @TotalPrice, 'Active', @Purpose, @NumberGuest, @UserComment, @AdminComment, @ForeheadVisitTime);
+        END TRY
+        BEGIN CATCH
+            -- Handle errors if needed
+            PRINT 'Error occurred while inserting reservation.';
+        END CATCH;
+
+        -- Display the inserted reservation record
+        SELECT * FROM Reservation WHERE UserID = @UserID AND RoomID = @RoomID AND StartTime = @ReservationStartDate;
+    END
+    ELSE
+    BEGIN
+        -- Display a message indicating that the room is already booked during the specified time slot
+        PRINT 'Room is already booked during the specified time slot. Double booking not allowed.';
+    END;
+END;
