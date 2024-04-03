@@ -1,0 +1,6 @@
+-- Example data for Room table
+INSERT INTO Room (RoomId, RoomName, Capacity)
+VALUES 
+('1', 'Room 1', 15),
+('2', 'Room 2', 20),
+('3', 'Room 3', 30);
