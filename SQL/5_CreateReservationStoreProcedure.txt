@@ -24,7 +24,7 @@ BEGIN
     BEGIN
         -- Insert the new user into the User table
         INSERT INTO [User] (UserID, UserName, E_mail, Phone_Num)
-        VALUES (@UserName, @E_mail, @Phone_Num);
+        VALUES (@UserName, @UserName, @E_mail, @Phone_Num);
     END;
 
     -- Retrieve the UserID for the user
