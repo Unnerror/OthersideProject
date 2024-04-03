@@ -1,1 +1,0 @@
-EXEC CancelReservation @ReservationID = 12; -- Replace 123 with the actual ReservationID

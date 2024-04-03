@@ -1,0 +1,26 @@
+DECLARE @RoomID CHAR(10) = '3';
+DECLARE @ReservationStartDate DATETIME = '2024-07-01 11:00:00'; -- Reservation start date
+DECLARE @ReservationEndDate DATETIME = '2024-07-01 15:00:00'; -- Reservation end date
+DECLARE @PreparationTime DATETIME = '2024-05-01 11:00:00'; -- Preparation time
+DECLARE @Purpose VARCHAR(64) = 'Meeting';
+DECLARE @NumberGuest INT = 5;
+DECLARE @UserName VARCHAR(64) = 'John Doe';
+DECLARE @E_mail VARCHAR(64) = 'john.doe@example.com';
+DECLARE @Phone_Num VARCHAR(15) = '1234567890';
+DECLARE @UserComment CHAR(512) = 'Special requests: vegetarian menu';
+DECLARE @AdminComment CHAR(512) = NULL;
+DECLARE @ForeheadVisitTime DATETIME = NULL;
+
+EXEC CreateReservation 
+    @RoomID, 
+    @ReservationStartDate, 
+    @ReservationEndDate, 
+    @PreparationTime, 
+    @Purpose, 
+    @NumberGuest, 
+    @UserComment, 
+    @AdminComment, 
+    @ForeheadVisitTime, 
+    @UserName, 
+    @E_mail, 
+    @Phone_Num;

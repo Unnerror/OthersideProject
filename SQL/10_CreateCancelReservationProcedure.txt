@@ -1,0 +1,29 @@
+CREATE PROCEDURE CancelReservation
+    @ReservationID INT
+AS
+BEGIN
+    -- Get reservation details
+    DECLARE @RoomID INT, @StartTime DATETIME, @EndTime DATETIME;
+
+    SELECT @RoomID = RoomID, @StartTime = StartTime, @EndTime = EndTime
+    FROM Reservation
+    WHERE ReservationID = @ReservationID;
+
+    -- Update Reservation status to 'Canceled'
+    UPDATE Reservation
+    SET Status = 'Canceled',
+        AdminComment = 'Reservation canceled. RoomID: ' + CAST(@RoomID AS NVARCHAR(10)) +
+                       ', Start Time: ' + CAST(@StartTime AS NVARCHAR(50)) +
+                       ', End Time: ' + CAST(@EndTime AS NVARCHAR(50))
+    WHERE ReservationID = @ReservationID;
+
+    -- Set RoomID, StartTime, and EndTime to NULL
+    UPDATE Reservation
+    SET RoomID = NULL,
+		PrepationTime = NULL,
+        StartTime = NULL,
+        EndTime = NULL 
+    WHERE ReservationID = @ReservationID;
+
+    PRINT 'Reservation canceled successfully.';
+END

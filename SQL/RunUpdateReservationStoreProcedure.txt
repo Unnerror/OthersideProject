@@ -1,3 +1,0 @@
-EXEC UpdateReservation
-    @ReservationID = 7,
-    @NewAdminComment = 'comment added via update procedure';
