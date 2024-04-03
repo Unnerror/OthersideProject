@@ -1,0 +1,4 @@
+
+SELECT * FROM RoomAvailabilityCalenderFunction(2,'2024-05-01', '2024-05-07');
+
+SELECT * FROM RoomAvailabilityOnDayFunction('2024-05-01');

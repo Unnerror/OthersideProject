@@ -1,0 +1,27 @@
+
+CREATE FUNCTION RoomAvailabilityCalenderFunction (@RoomID INT, @StartDate DATETIME, @EndDate DATETIME)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT 
+        r.RoomID,
+        r.RoomName,
+        DATEADD(HOUR, SlotNumber, @StartDate) AS StartTime,
+        DATEADD(HOUR, SlotNumber + 1, @StartDate) AS EndTime
+    FROM 
+        Room r
+    CROSS JOIN
+        (SELECT ROW_NUMBER() OVER (ORDER BY number) - 1 AS SlotNumber
+         FROM master.dbo.spt_values
+         WHERE type = 'P' AND number BETWEEN 0 AND DATEDIFF(HOUR, @StartDate, @EndDate)) AS TimeSlots
+    LEFT JOIN 
+        Reservation rs ON r.RoomID = rs.RoomID
+        AND rs.RoomID = @RoomID
+        AND DATEADD(HOUR, SlotNumber, @StartDate) < rs.EndTime 
+        AND DATEADD(HOUR, SlotNumber + 1, @StartDate) > rs.StartTime
+    WHERE
+        r.RoomID = @RoomID
+        AND rs.ReservationID IS NULL
+);
+

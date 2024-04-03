@@ -1,0 +1,34 @@
+CREATE FUNCTION RoomAvailabilityOnDayFunction (@Date DATE)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT 
+        r.RoomID,
+        r.RoomName,
+        @Date AS Date,
+        CONCAT(DATEPART(HOUR, Slot.StartTime), ':', RIGHT('00' + CAST(DATEPART(MINUTE, Slot.StartTime) AS VARCHAR(2)), 2), '-', DATEPART(HOUR, Slot.EndTime), ':', RIGHT('00' + CAST(DATEPART(MINUTE, Slot.EndTime) AS VARCHAR(2)), 2)) AS TimeSlot,
+        CASE 
+            WHEN rs.ReservationID IS NULL THEN 'Available'
+            ELSE 'Booked'
+        END AS Availability
+    FROM 
+        Room r
+    CROSS APPLY (
+        SELECT 
+            DATEADD(HOUR, number, CAST(@Date AS DATETIME)) AS StartTime,
+            DATEADD(HOUR, number + 1, CAST(@Date AS DATETIME)) AS EndTime
+        FROM 
+            master.dbo.spt_values
+        WHERE 
+            type = 'P' AND 
+            number >= 0 AND 
+            number < 24
+    ) AS Slot
+    LEFT JOIN 
+        Reservation rs ON r.RoomID = rs.RoomID
+        AND rs.StartTime < Slot.EndTime
+        AND rs.EndTime > Slot.StartTime
+);
+
+
