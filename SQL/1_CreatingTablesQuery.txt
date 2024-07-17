@@ -52,8 +52,8 @@ CREATE TABLE BookingRules (
     DayofWeek CHAR(10),
     StartTime TIME(7),
     EndTime TIME(7),
-    PricePerHour INT
-    MinimalOrderLength FLOAT;
+    PricePerHour INT,
+    MinimalOrderLength FLOAT
 );
 
 -- Add foreign key constraint for UserID in Reservation table
