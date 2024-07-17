@@ -1,0 +1,9 @@
+CREATE PROCEDURE GetBookingRules
+    @RoomID CHAR(10)
+AS
+BEGIN
+    SELECT RuleID, RoomID, DayofWeek, StartTime, EndTime, PricePerHour, MinimalOrderLength
+    FROM BookingRules
+    WHERE RoomID = @RoomID
+    ORDER BY DayofWeek, StartTime;
+END
